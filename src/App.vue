@@ -1,28 +1,40 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <TodoListAdd v-on:add="handleAdd" />
+    <TodoList v-bind:items="items" v-on:item:change-position="handleChangePosition" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import { mapState } from 'vuex';
+import { v4 as uuidv4 } from 'uuid';
+import store from './store';
+import TodoList from './components/TodoList.vue';
+import TodoListAdd from './components/TodoListAdd.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
+    TodoList,
+    TodoListAdd,
+  },
+  computed: mapState({
+    items: (state) => state.listItems,
+  }),
+  methods: {
+    handleAdd(content) {
+      store.commit('addListItem', {
+        id: uuidv4(),
+        content,
+        checked: false,
+      });
+    },
+    handleChangePosition(info) {
+      store.commit('changeListItemPosition', info);
+    },
   },
 };
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
