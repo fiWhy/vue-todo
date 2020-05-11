@@ -1,20 +1,34 @@
 <template>
   <div class="todo__list">
-    <DropZone v-bind:position="0" v-on:drop="handleDrop" />
-    <div v-bind:key="item.id" v-for="(item, index) in items">
-      {{ index }}
+    <DropZone
+      :class="{ 'non-drag': draggingElementIndex === 0 }"
+      :position="0"
+      @drop="handleDrop"
+    />
+    <template v-for="(item, i) in items">
       <TodoItem
-        v-bind:number="index + 1"
-        v-bind:item="item"
-        v-on:dragend="handleDragEnd"
-        v-on:dragstart="handleDragStart(index)"
+        :key="`item-${item.id}`"
+        :item="item"
+        :is-dragging="item === draggingElement"
+        @dragend="handleDragEnd"
+        @dragstart="handleDragStart(i)"
+        @check="handleCheck"
+        @remove="handleRemove"
+        :number="i + 1"
       />
-      <DropZone v-bind:position="index+1" v-on:drop="handleDrop" />
-    </div>
+      <DropZone
+        :class="{
+          'non-drag': draggingElementIndex === i || draggingElementIndex === i + 1,
+        }"
+        :key="`drop-zone-${item.id}`"
+        :position="i + 1"
+        @drop="handleDrop"
+      />
+    </template>
   </div>
 </template>
-<script>
 
+<script>
 import TodoItem from './TodoItem.vue';
 import DropZone from './DropZone.vue';
 
@@ -32,23 +46,41 @@ export default {
   },
   data() {
     return {
-      draggableElement: null,
+      draggingElement: null,
+      draggingElementIndex: null,
+      model: 1,
     };
   },
   methods: {
     handleDragStart(index) {
-      this.draggableElement = this.items[index];
-      this.$emit('dragstart', this.draggableElement);
+      this.draggingElement = this.items[index];
+      this.draggingElementIndex = index;
+      this.$emit('dragstart', this.draggingElement);
     },
     handleDragEnd() {
       this.$emit('dragend');
+      this.draggingElement = null;
+      this.draggingElementIndex = null;
     },
     handleDrop(to) {
+      const item = this.draggingElement;
       this.$emit('item:change-position', {
-        item: this.draggableElement,
+        item,
         to,
       });
+    },
+    handleCheck(item) {
+      this.$emit('item:check', item);
+    },
+    handleRemove(item) {
+      this.$emit('item:remove', item);
     },
   },
 };
 </script>
+<style lang="scss">
+.todo__list {
+  display: flex;
+  flex-direction: column;
+}
+</style>

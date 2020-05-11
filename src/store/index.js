@@ -9,13 +9,19 @@ export default new Vuex.Store({
     dragListItem: null,
     listItems: [],
   },
+  getters: {
+    finishedItems: (state) => state.listItems.filter((item) => item.checked),
+  },
   mutations: {
-    removeListItem(state, id) {
-      state.listItems = state.listItems.filter((item) => item.id !== id);
+    removeListItem(state, item) {
+      state.listItems = state.listItems.filter((listItem) => listItem.id !== item.id);
     },
-    checkListItem(state, id) {
-      const elementIndex = state.listItems.findIndex((item) => item.id === id);
-      const element = { ...state.listItems[elementIndex], checked: true };
+    checkListItem(state, item) {
+      const elementIndex = state.listItems.findIndex((listItem) => listItem.id === item.id);
+      const element = {
+        ...state.listItems[elementIndex],
+        checked: !state.listItems[elementIndex].checked,
+      };
       state.listItems = [
         ...state.listItems.slice(0, elementIndex),
         element,
@@ -28,8 +34,7 @@ export default new Vuex.Store({
     changeListItemPosition(state, { item, to }) {
       const itemIndex = state.listItems.findIndex((listItem) => listItem.id === item.id);
       if (itemIndex > to) {
-        const position = Math.min(to, state.listItems.length - 1);
-        state.listItems = move(state.listItems, itemIndex, position);
+        state.listItems = move(state.listItems, itemIndex, to);
       } else if (itemIndex < to && to - itemIndex > 1) {
         state.listItems = move(state.listItems, itemIndex, Math.max(to - 1, 0));
       } else {

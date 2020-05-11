@@ -1,12 +1,21 @@
 <template>
   <div id="app">
-    <TodoListAdd v-on:add="handleAdd" />
-    <TodoList v-bind:items="items" v-on:item:change-position="handleChangePosition" />
+    <TodoListAdd @add="handleAdd" />
+    <TodoList
+      :items="items"
+      @item:check="handleCheck"
+      @item:remove="handleRemove"
+      @item:change-position="handleChangePosition"
+    />
+    <div>
+      <div>Total: {{ items.length }}</div>
+      <div>Finished: {{ finishedItems.length }}</div>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import { v4 as uuidv4 } from 'uuid';
 import store from './store';
 import TodoList from './components/TodoList.vue';
@@ -18,9 +27,12 @@ export default {
     TodoList,
     TodoListAdd,
   },
-  computed: mapState({
-    items: (state) => state.listItems,
-  }),
+  computed: {
+    ...mapState({
+      items: (state) => state.listItems,
+    }),
+    ...mapGetters(['finishedItems']),
+  },
   methods: {
     handleAdd(content) {
       store.commit('addListItem', {
@@ -30,11 +42,18 @@ export default {
       });
     },
     handleChangePosition(info) {
+      this.dragItemIndex = null;
       store.commit('changeListItemPosition', info);
+    },
+    handleRemove(item) {
+      store.commit('removeListItem', item);
+    },
+    handleCheck(item) {
+      console.log(item);
+      store.commit('checkListItem', item);
     },
   },
 };
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

@@ -4,7 +4,7 @@
     v-on:dragover="$event.preventDefault()"
     v-on:dragenter="isDragActive = true"
     v-on:dragleave="isDragActive = false"
-    v-bind:class="{entered: isDragActive}"
+    v-bind:class="{ entered: isDragActive }"
     class="drop__zone"
   >
     <slot />
@@ -32,10 +32,14 @@ export default {
 </script>
 <style lang="scss">
 .drop__zone {
-  height: 10px;
+  transition: height 0.5s, background-color 0.5s;
+  height: 5px;
   width: 100%;
-  &.entered {
-    background-color: red;
+  &:not(.non-drag) {
+    &.entered {
+      height: 10px;
+      background-color: red;
+    }
   }
 }
 </style>
